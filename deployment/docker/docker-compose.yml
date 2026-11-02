@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gdb}
+      POSTGRES_USER: ${POSTGRES_USER:-gdb_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set a local password}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - gdb-postgres:/var/lib/postgresql
+  gdb:
+    build:
+      context: ../../backend
+    environment:
+      GDB_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-gdb}
+      GDB_DB_USERNAME: ${POSTGRES_USER:-gdb_app}
+      GDB_DB_PASSWORD: ${POSTGRES_PASSWORD:?set a local password}
+      GDB_ADMIN_TOKEN: ${GDB_ADMIN_TOKEN:?set a local admin token}
+      GDB_SNAPSHOT_MASTER_KEY: ${GDB_SNAPSHOT_MASTER_KEY:?set a base64 32-byte key}
+      GDB_SNAPSHOT_STORAGE: /var/lib/gdb/snapshots
+      GDB_SERVER_ADDRESS: 0.0.0.0
+      GDB_SERVER_PORT: 8095
+      GDB_ALLOWED_ORIGINS: ${GDB_ALLOWED_ORIGINS:-http://localhost:4200}
+    ports:
+      - "127.0.0.1:8095:8095"
+    volumes:
+      - gdb-snapshots:/var/lib/gdb/snapshots
+    depends_on:
+      - postgres
+volumes:
+  gdb-postgres:
+  gdb-snapshots:

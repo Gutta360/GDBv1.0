@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: gdb-backend
+  datasource:
+    url: ${GDB_DB_URL:jdbc:postgresql://127.0.0.1:5432/gdb}
+    username: ${GDB_DB_USERNAME:gdb_app}
+    password: ${GDB_DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${GDB_DB_POOL_MAX:10}
+      minimum-idle: ${GDB_DB_POOL_MIN:2}
+      connection-timeout: ${GDB_DB_CONNECTION_TIMEOUT_MS:5000}
+  flyway:
+    enabled: true
+    schemas: gdb_core
+    default-schema: gdb_core
+    locations: classpath:db/migration
+    validate-migration-naming: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: gdb_core
+        jdbc.time_zone: UTC
+  jackson:
+    deserialization.fail-on-unknown-properties: true
+    datatype.datetime.write-dates-as-timestamps: false
+
+server:
+  address: ${GDB_SERVER_ADDRESS:127.0.0.1}
+  port: ${GDB_SERVER_PORT:8095}
+  shutdown: graceful
+  error.include-message: never
+  error.include-stacktrace: never
+
+management:
+  endpoints.web.exposure.include: health,info,metrics
+  endpoint.health.show-details: never
+  health.db.enabled: true
+
+gdb:
+  # Bootstrap token is for initial provisioning/emergency recovery only. Normal
+  # portal access uses an expiring HttpOnly admin session cookie.
+  admin-token: ${GDB_ADMIN_BOOTSTRAP_TOKEN:${GDB_ADMIN_TOKEN:}}
+  admin-session-ttl: ${GDB_ADMIN_SESSION_TTL:PT8H}
+  admin-session-cookie-secure: ${GDB_ADMIN_SESSION_COOKIE_SECURE:true}
+  snapshot-master-key: ${GDB_SNAPSHOT_MASTER_KEY:}
+  snapshot-storage: ${GDB_SNAPSHOT_STORAGE:./data/snapshots}
+  allowed-origins: ${GDB_ALLOWED_ORIGINS:http://localhost:4200}
+  enrollment-ttl: ${GDB_ENROLLMENT_TTL:PT30M}
+  max-batch-size: ${GDB_MAX_BATCH_SIZE:100}
+  max-pull-size: ${GDB_MAX_PULL_SIZE:100}
+  max-snapshot-bytes: ${GDB_MAX_SNAPSHOT_BYTES:52428800}
+  snapshot-retention-count: ${GDB_SNAPSHOT_RETENTION_COUNT:10}
+
+logging:
+  level:
+    root: INFO
+    com.gutta.gdb: INFO

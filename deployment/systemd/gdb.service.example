@@ -1,0 +1,24 @@
+[Unit]
+Description=GDB GApps Data Backup backend
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gdb
+Group=gdb
+WorkingDirectory=/home/gutta/gdb/backend/current
+EnvironmentFile=/etc/gdb/backend.env
+ExecStart=/usr/bin/java -Xms128m -Xmx512m -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -jar /home/gutta/gdb/backend/current/gdb-backend-1.0.0-SNAPSHOT.jar
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+MemoryHigh=640M
+MemoryMax=768M
+CPUQuota=200%
+ReadWritePaths=/var/lib/gdb
+
+[Install]
+WantedBy=multi-user.target
